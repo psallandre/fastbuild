@@ -66,10 +66,6 @@
 											'LZ4-Lib-$Platform$-$Config$' }
 			.LinkerOutput				= '$OutputBase$\Tools\FBuild\FBuildApp\FBuild.exe'
 			.LinkerOptions				+ ' /SUBSYSTEM:CONSOLE'
-										+ ' kernel32.lib'
-										+ ' Ws2_32.lib'
-										+ ' LIBCMT.LIB'
-										+ ' User32.lib'
 		}
 		Alias( '$ProjectName$-$Platform$-$Config$' ) { .Targets = '$ProjectName$-Exe-$Platform$-$Config$' }
 	}

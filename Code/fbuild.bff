@@ -4,9 +4,10 @@
 ;-------------------------------------------------------------------------------
 ; Windows Platform
 ;-------------------------------------------------------------------------------
-.VSBasePath			= '../External/SDK/VS13.4'
-.WindowsSDKBasePath	= '../External/SDK/Windows8.1'
-.ClangBasePath		= '../External/SDK/ClangForWindows/3.6'
+.VSBasePath           = 'C:/Program Files (x86)/Microsoft Visual Studio 14.0'
+.WindowsSDKBasePath   = 'C:/Program Files (x86)/Windows Kits/8.1'
+.WindowsSDKBasePath10 = 'C:/Program Files (x86)/Windows Kits/10'
+.ClangBasePath		  = '../External/SDK/ClangForWindows/3.6'
 
 ;-------------------------------------------------------------------------------
 ; Settings
@@ -52,23 +53,21 @@ Compiler( 'Compiler-x86' )
 }
 Compiler( 'Compiler-x64' )
 {
-	.Root		= '$VSBasePath$\VC\bin'
-	.Executable	= '$Root$\x86_amd64\cl.exe'
-	.ExtraFiles = { '$Root$\x86_amd64\c1.dll'
-					'$Root$\x86_amd64\c1ast.dll',
-					'$Root$\x86_amd64\c1xx.dll',
-					'$Root$\x86_amd64\c1xxast.dll',
-					'$Root$\x86_amd64\c2.dll',
-					'$Root$\x86_amd64\1033\clui.dll'
-					'$Root$\msobj120.dll'
-					'$Root$\mspdb120.dll'
-					'$Root$\mspdbsrv.exe'
-					'$Root$\mspdbcore.dll'
-					'$Root$\mspft120.dll'
-					'$VSBasePath$\VC\redist\x86\Microsoft.VC120.CRT\msvcp120.dll'
-					'$VSBasePath$\VC\redist\x86\Microsoft.VC120.CRT\msvcr120.dll'
-					'$VSBasePath$\VC\redist\x86\Microsoft.VC120.CRT\vccorlib120.dll'
-				  }
+	.Root   = '$VSBasePath$\VC\bin'
+	.Executable = '$Root$\amd64\cl.exe'
+	.ExtraFiles = { '$Root$\amd64\c1.dll'
+					'$Root$\amd64\c1xx.dll',
+					'$Root$\amd64\c2.dll',
+					'$Root$\amd64\1033\clui.dll'
+					'$Root$\amd64\msobj140.dll'
+					'$Root$\amd64\mspdb140.dll'
+					'$Root$\amd64\mspdbsrv.exe'
+					'$Root$\amd64\mspdbcore.dll'
+					'$Root$\amd64\mspft140.dll'
+					'$VSBasePath$\VC\redist\x64\Microsoft.VC140.CRT\msvcp140.dll'
+					'$VSBasePath$\VC\redist\x64\Microsoft.VC140.CRT\vcruntime140.dll'
+					'$VSBasePath$\VC\redist\x64\Microsoft.VC140.CRT\vccorlib140.dll'
+                    }
 }
 Compiler( 'Compiler-x86Clang' )
 {
@@ -101,10 +100,10 @@ Compiler( 'Compiler-x64-OSX' )
 							+ ' /we4905' // wide string literal cast to 'LPSTR'
 							+ ' /we4906' // string literal cast to 'LPWSTR'
 
-	.CompilerOptions 		= '"%1" /Z7 /nologo /c /W4 /WX'
+	.CompilerOptions 		= '"%1" /Z7 /nologo /c /W4' // /WX'
 							+ ' /Zc:inline'			// Remove unreferenced COMDATs at compile time (VS2013.2+)
 							+ ' /Zc:strictStrings'	// Require const only usage of string literals (VS2013+)
-							+ .AdditionalWarnings
+							//+ .AdditionalWarnings
 							+ ' /fp:fast'
 							+ ' /D"WIN32_LEAN_AND_MEAN" /D_WIN32 /D__WINDOWS__'
 							+ ' /D"_CRT_SECURE_NO_WARNINGS"' // don't warn about unsafe functions
@@ -114,6 +113,27 @@ Compiler( 'Compiler-x64-OSX' )
 	.CompilerOptions		+ ' /Fo"%2"'
 	.LibrarianOptions		= '/NODEFAULTLIB /WX /NOLOGO /OUT:"%2" "%1"'
 	.LinkerOptions			= '/NODEFAULTLIB /WX /NOLOGO /INCREMENTAL:NO /OUT:"%2" "%1" /DEBUG'
+                            + ' /IGNORE:4001' ; don't complain about linking libs only
+                            + ' kernel32.lib'
+                            + ' user32.lib'
+                            + ' gdi32.lib'
+                            + ' winspool.lib'
+                            + ' comdlg32.lib'
+                            + ' advapi32.lib'
+                            + ' shell32.lib'
+                            + ' ole32.lib'
+                            + ' oleaut32.lib'
+                            + ' uuid.lib'
+                            + ' odbc32.lib'
+                            + ' odbccp32.lib'
+                            + ' ws2_32.lib'
+    //http://blogs.msdn.com/b/vcblog/archive/2015/03/03/introducing-the-universal-crt.aspx
+    .LinkerDebugOptions     = ' libcmtd.lib'
+                            + ' libucrtd.lib'
+                            + ' libvcruntimed.lib'
+    .LinkerReleaseOptions   = ' libcmt.lib'
+                            + ' libucrt.lib'
+                            + ' libvcruntime.lib'
 
 	// Optimizations
 	.CompilerDebugOptimizations		= ' /MTd /Od /RTC1 /GS /Oy- /GR- /analyze'
@@ -127,10 +147,12 @@ Compiler( 'Compiler-x64-OSX' )
 							+ ' /I"$VSBasePath$/VC/include/"'
 							+ ' /I"$WindowsSDKBasePath$/include/um"'
 							+ ' /I"$WindowsSDKBasePath$/include/shared"'
+                            + ' /I"$WindowsSDKBasePath10$/Include\10.0.10150.0\ucrt"'
 	.CompilerOptions		+ .BaseIncludePaths
 	.PCHOptions				+ .BaseIncludePaths
 
 	.WindowsLibPaths		= '$WindowsSDKBasePath$/lib/winv6.3/um'
+    .WindowsLibPaths10      = '$WindowsSDKBasePath10$/lib/10.0.10150.0/ucrt'
 
 	.UseExceptions			= ' /EHsc'
 ]
@@ -196,7 +218,7 @@ Compiler( 'Compiler-x64-OSX' )
 .X64BaseConfig = 
 [
 	Using( .MSVCBaseConfig )
-	.ToolsBasePath			= '$VSBasePath$\VC\bin\x86_amd64'
+    .ToolsBasePath			= '$VSBasePath$\VC\bin\amd64'
 	.Compiler				= 'Compiler-x64'
 	.Librarian				= '$ToolsBasePath$\lib.exe'
 	.Linker					= '$ToolsBasePath$\link.exe'
@@ -204,7 +226,9 @@ Compiler( 'Compiler-x64-OSX' )
 	.PCHOptions				+ ' /DWIN64'
 	.LinkerOptions			+ ' /MACHINE:X64'
 	.Platform				= 'x64'
-	.LinkerOptions			+ ' /LIBPATH:"$WindowsLibPaths$/x64" /LIBPATH:"$VSBasePath$/VC/lib/amd64"'
+	.LinkerOptions			+ ' /LIBPATH:"$WindowsLibPaths10$/x64"'
+							+ ' /LIBPATH:"$WindowsLibPaths$/x64"'
+							+ ' /LIBPATH:"$VSBasePath$/VC/lib/amd64"'
 ]
 .X64DebugConfig =
 [
@@ -216,6 +240,8 @@ Compiler( 'Compiler-x64-OSX' )
 							+ .CompilerDebugOptimizations							
 	.LibrarianOptions		+ .LibrarianDebugOptimizations
 	.LinkerOptions			+ .LinkerDebugOptimizations
+                            + ' /SUBSYSTEM:CONSOLE'
+                            + .LinkerDebugOptions
 ]
 .X64ReleaseConfig =
 [
@@ -233,6 +259,8 @@ Compiler( 'Compiler-x64-OSX' )
 	.PCHOptions             + .CompilerReleaseOptimizations							
 	.LibrarianOptions		+ .LibrarianReleaseOptimizations
 	.LinkerOptions			+ .LinkerReleaseOptimizations
+                            + ' /SUBSYSTEM:CONSOLE'
+                            + .LinkerReleaseOptions
 ]
 .X64ProfileConfig =
 [
@@ -471,7 +499,7 @@ Compiler( 'Compiler-x64-OSX' )
 	.OutputDirectory			= '^$(SolutionDir)\..\tmp2'
 	.IntermediateDirectory		= '^$(SolutionDir)\..\tmp2'
 	.Platform = 'Win32' // unused
-	.PlatformToolset = 'v120'
+	.PlatformToolset = 'v140'
 	.IncludeSearchPath			= '^$(SolutionDir)..\..;.\'
 	.X86Defines					= 'WIN32_LEAN_AND_MEAN;_WIN32;__WINDOWS__;WIN32;'
 	.X64Defines					= 'WIN32_LEAN_AND_MEAN;_WIN32;__WINDOWS__;WIN64;'
